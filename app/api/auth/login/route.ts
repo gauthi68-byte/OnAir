@@ -1,50 +1,33 @@
 import { NextResponse } from 'next/server';
+import db from '../../../../lib/db';
 import bcrypt from 'bcrypt';
-import pool from '@/lib/db';
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
+    const { username, password } = await request.json();
 
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: 'E-mail et mot de passe requis.' },
-        { status: 400 }
-      );
+    if (!username || !password) {
+      return NextResponse.json({ error: 'Tous les champs sont requis' }, { status: 400 });
     }
 
-    const [rows]: any = await pool.query(
-      'SELECT id, email, password_hash FROM users WHERE email = ?',
-      [email]
+    const [rows]: any = await db.execute(
+      'SELECT * FROM users WHERE username = ?',
+      [username]
     );
 
     if (rows.length === 0) {
-      return NextResponse.json(
-        { error: 'Identifiants incorrects.' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Utilisateur ou mot de passe incorrect' }, { status: 401 });
     }
 
     const user = rows[0];
-    const passwordMatch = await bcrypt.compare(password, user.password_hash);
+    const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
-      return NextResponse.json(
-        { error: 'Identifiants incorrects.' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Utilisateur ou mot de passe incorrect' }, { status: 401 });
     }
 
-    return NextResponse.json(
-      { message: 'Connexion réussie.', user: { id: user.id, email: user.email } },
-      { status: 200 }
-    );
-
-  } catch (error) {
-    console.error('Erreur connexion :', error);
-    return NextResponse.json(
-      { error: 'Erreur interne du serveur.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, message: 'Connexion réussie' });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
