@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../../../../lib/supabase';
 import bcrypt from 'bcrypt';
 import { NextResponse } from 'next/server';
 
@@ -6,7 +6,6 @@ export async function POST(request: Request) {
   try {
     const { username, password } = await request.json();
 
-    // Recherche de l'utilisateur dans Supabase
     const { data: users, error } = await supabase
       .from('users')
       .select('*')
