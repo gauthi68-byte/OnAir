@@ -1,50 +1,36 @@
 import { NextResponse } from 'next/server';
+import db from '../../../../lib/db';
 import bcrypt from 'bcrypt';
-import pool from '@/lib/db';
-import { randomUUID } from 'crypto';
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
+    const { username, password } = await request.json();
 
-    if (!email || !password || password.length < 8) {
-      return NextResponse.json(
-        { error: 'E-mail requis et mot de passe de 8 caractères minimum.' },
-        { status: 400 }
-      );
+    if (!username || !password) {
+      return NextResponse.json({ error: 'Tous les champs sont requis' }, { status: 400 });
     }
 
-    const [existingUsers]: any = await pool.query(
-      'SELECT id FROM users WHERE email = ?',
-      [email]
+    // Vérifier si l'utilisateur existe déjà
+    const [existing]: any = await db.execute(
+      'SELECT id FROM users WHERE username = ?',
+      [username]
     );
 
-    if (existingUsers.length > 0) {
-      return NextResponse.json(
-        { error: 'Cet e-mail est déjà utilisé.' },
-        { status: 409 }
-      );
+    if (existing.length > 0) {
+      return NextResponse.json({ error: 'Ce nom d\'utilisateur est déjà pris' }, { status: 400 });
     }
 
-    const saltRounds = 12;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
-    const uuid = randomUUID();
+    // Hasher le mot de passe
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    await pool.query(
-      'INSERT INTO users (uuid, email, password_hash, email_verified) VALUES (?, ?, ?, TRUE)',
-      [uuid, email, passwordHash]
+    // Insérer le nouvel utilisateur
+    await db.execute(
+      'INSERT INTO users (username, password) VALUES (?, ?)',
+      [username, hashedPassword]
     );
 
-    return NextResponse.json(
-      { message: 'Inscription réussie.' },
-      { status: 201 }
-    );
-
-  } catch (error) {
-    console.error('Erreur inscription :', error);
-    return NextResponse.json(
-      { error: 'Erreur interne du serveur.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, message: 'Inscription réussie' });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
