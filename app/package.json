@@ -1,0 +1,12 @@
+Construction en cours à Washington, D.C., États-Unis (Est) – iad1
+Configuration de la machine : 2 cœurs, 8 Go
+Clonage de github.com/gauthi68-byte/OnAir (Branche : main, Commit : 3d47eab)
+Les caches des versions précédentes ne sont pas disponibles.
+Clonage terminé : 669,000 ms
+Exécution de « vercel build »
+Vercel CLI 59.3.0
+Votre application est actuellement compilée avec la commande `next build`. Si vous souhaitez définir une autre étape de compilation, veuillez créer un script `vercel-build` dans votre fichier `package.json` (par exemple : `{ "scripts": { "vercel-build": "npm run prepare && next build" } }`).
+Installation des dépendances...
+Mise à jour en 373 ms
+Avertissement : Impossible d’identifier la version de Next.js ; assurez-vous qu’elle est définie comme dépendance du projet.
+Erreur : Aucune version de Next.js détectée. Assurez-vous que votre fichier package.json contient bien « next » dans « dependencies » ou « devDependencies ». Vérifiez également que le répertoire racine correspond bien au répertoire de votre fichier package.json.
